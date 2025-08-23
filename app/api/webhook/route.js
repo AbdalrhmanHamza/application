@@ -23,14 +23,19 @@ export async function POST(req) {
   let rawBody;
   try {
     rawBody = await req.text();
+    console.log("Webhook raw body length:", rawBody?.length ?? 0);
   } catch (e) {
     console.error("Failed to read request body", e);
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 }
+    );
   }
 
   // Fetch headers and verify signature
   const headersList = headers();
-  const signature = headersList.get("stripe-signature");
+  const signature =
+    headersList.get("stripe-signature") || headersList.get("Stripe-Signature");
   if (!signature) {
     return NextResponse.json(
       { error: "Missing stripe-signature header" },
@@ -40,10 +45,13 @@ export async function POST(req) {
 
   let event;
   try {
+    // Optional tolerance (seconds) to account for minor clock skew
+    const tolerance = 300;
     event = stripe.webhooks.constructEvent(
       rawBody,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET
+      process.env.STRIPE_WEBHOOK_SECRET,
+      tolerance
     );
   } catch (error) {
     console.error("Webhook signature verification failed", error);
@@ -101,7 +109,11 @@ export async function POST(req) {
       };
 
       if (!snap.exists) {
-        trx.set(txRef, { ...baseData, webhookProcessed: true, notified: false });
+        trx.set(txRef, {
+          ...baseData,
+          webhookProcessed: true,
+          notified: false,
+        });
         shouldNotify = true;
       } else {
         const data = snap.data() || {};
@@ -121,14 +133,21 @@ export async function POST(req) {
       try {
         const modDoc = await db.collection("users").doc(moderatorId).get();
         const modData = modDoc.data();
-        const raw = (modData?.fcmToken ?? modData?.fcmTokens) ?? [];
+        const raw = modData?.fcmToken ?? modData?.fcmTokens ?? [];
         const arr = Array.isArray(raw) ? raw : raw ? [raw] : [];
         tokens = Array.from(
           new Set(
-            arr.filter((t) => typeof t === "string").map((t) => t.trim()).filter(Boolean)
+            arr
+              .filter((t) => typeof t === "string")
+              .map((t) => t.trim())
+              .filter(Boolean)
           )
         );
-        tokensField = Array.isArray(modData?.fcmToken) ? "fcmToken" : (modData?.fcmTokens ? "fcmTokens" : "fcmToken");
+        tokensField = Array.isArray(modData?.fcmToken)
+          ? "fcmToken"
+          : modData?.fcmTokens
+          ? "fcmTokens"
+          : "fcmToken";
         console.log("⛈🌧☁⛅⏳ FCM tokens for moderator:", tokens);
       } catch (e) {
         console.warn("Failed to load moderator tokens", e);
@@ -170,10 +189,10 @@ export async function POST(req) {
 
         if (toRemove.size > 0 && moderatorId) {
           const pruned = tokens.filter((t) => !toRemove.has(t));
-          await db.collection("users").doc(moderatorId).set(
-            { [tokensField]: pruned },
-            { merge: true }
-          );
+          await db
+            .collection("users")
+            .doc(moderatorId)
+            .set({ [tokensField]: pruned }, { merge: true });
           console.log("Pruned invalid FCM tokens:", Array.from(toRemove));
         }
 
