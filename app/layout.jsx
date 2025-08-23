@@ -1,14 +1,11 @@
 "use client";
 
-import AuthProvider, { useAuth } from "./contexts/AuthContext";
+import AuthProvider from "./contexts/AuthContext";
 import ProductProvider from "./contexts/ProductContext";
 import { Cairo } from "next/font/google";
-import { Toaster, toast } from "sonner";
+import { Toaster } from "sonner";
 import FCMTokensProvider from "./contexts/FCMTokens";
-import { useEffect, useState } from "react";
-import { onMessage, getMessaging } from "firebase/messaging";
-import { doc, setDoc, arrayUnion, getDoc } from "firebase/firestore";
-import { initializeFirebase, generateToken } from "../firebase_config";
+import { useState } from "react";
 import "./globals.css";
 
 const cairo = Cairo({
