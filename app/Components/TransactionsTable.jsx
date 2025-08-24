@@ -174,7 +174,7 @@ export default function TransactionsTable({ transactions, role }) {
         <tbody>
           {transactions.map((transaction, i) => (
             <tr key={i} className="border-b border-neutral-800">
-              <td key="1">
+              <td key="1" className="text-center">
                 {new Date(
                   transaction.createdAt?.seconds * 1000
                 ).toLocaleDateString()}
