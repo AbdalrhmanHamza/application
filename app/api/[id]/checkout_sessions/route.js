@@ -10,7 +10,10 @@ export async function POST(req, { params }) {
     const rawBody = await req.text();
     if (!rawBody) {
       console.error("Empty request body");
-      return NextResponse.json({ error: "Empty request body" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Empty request body" },
+        { status: 400 }
+      );
     }
     let body;
     try {
@@ -31,7 +34,6 @@ export async function POST(req, { params }) {
 
     // Get the id from the dynamic route
     const { id } = await params;
-    console.log("Route ID:", id);
 
     console.log("creating customer: ");
     console.log("name: ", name);
