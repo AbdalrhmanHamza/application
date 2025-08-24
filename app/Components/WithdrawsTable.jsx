@@ -6,9 +6,8 @@ import sendNotification from "../../utils/sendNotification";
 import { doc, setDoc } from "firebase/firestore";
 import { initializeFirebase } from "../../firebase_config";
 
-export default function TransactionsTable({ transactions, role }) {
+export default function WithdrawsTable({ transactions, role }) {
   const [focusedTransaction, setFocusedTransaction] = useState(null);
-  console.log("TransactionsTable transactions:", role);
 
   const intl = new Intl.NumberFormat("en-US", {
     currency: "USD",
@@ -17,14 +16,6 @@ export default function TransactionsTable({ transactions, role }) {
 
   function changeStatus(newStatus, uid, transactionId) {
     if (focusedTransaction.status == newStatus || !focusedTransaction) return;
-
-    console.log("changeStatus called with:", {
-      newStatus,
-      uid,
-      transactionId,
-    });
-    console.log("focusedTransaction Status:", focusedTransaction.status);
-    // if (!focusedTransaction || focusedTransaction.status === newStatus) return;
     // Update transaction status in Firestore
     const { db } = initializeFirebase();
     if (!db) {
@@ -33,7 +24,7 @@ export default function TransactionsTable({ transactions, role }) {
     }
 
     const userRef = doc(db, "users", uid);
-    const transactionRef = doc(userRef, "transactions", transactionId);
+    const transactionRef = doc(userRef, "withdrawOrders", transactionId);
 
     setDoc(transactionRef, { status: newStatus }, { merge: true })
       .then(() => {
@@ -79,7 +70,15 @@ export default function TransactionsTable({ transactions, role }) {
               <div>
                 <strong>الاسم</strong>
                 <span className="inline-block mr-2 border border-neutral-700 px-2 py-1 rounded-lg">
-                  {focusedTransaction.userName}
+                  {focusedTransaction.firstName +
+                    " " +
+                    focusedTransaction.lastName}
+                </span>
+              </div>
+              <div>
+                <strong>رقم الهاتف</strong>
+                <span className="inline-block mr-2 border border-neutral-700 px-2 py-1 rounded-lg">
+                  {focusedTransaction.phone}
                 </span>
               </div>
               <div>
@@ -121,8 +120,26 @@ export default function TransactionsTable({ transactions, role }) {
               <div>
                 <strong>طريقة السحب:</strong>
                 <span className="inline-block mr-2 border border-neutral-700 px-2 py-1 rounded-lg">
-                  {focusedTransaction.paymentMethod}
+                  {focusedTransaction.method}
                 </span>
+              </div>
+              <div className="flex flex-col col-span-full gap-2">
+                <strong>معلومات حساب التحويل :</strong>{" "}
+                <div className="px-4 py-2 border border-neutral-700 rounded-lg bg-neutral-900">
+                  <p className="text-lg text-blue-500">
+                    {focusedTransaction.methodInfo}
+                  </p>
+                </div>
+              </div>
+              <div className="flex col-span-full flex-col gap-2">
+                <strong>صورة الايصال:</strong>{" "}
+                <img
+                  data-zoomable
+                  style={{ objectFit: "contain" }}
+                  className="w-[95%] mx-auto  rounded-lg"
+                  src={focusedTransaction.imageUrl}
+                  alt="صوره ايصال التحويل"
+                />
               </div>
             </div>
             <div className="flex justify-end gap-4">
@@ -131,8 +148,8 @@ export default function TransactionsTable({ transactions, role }) {
                   onClick={() => {
                     changeStatus(
                       "completed",
-                      focusedTransaction.userId,
-                      focusedTransaction.sessionId
+                      focusedTransaction.uid,
+                      focusedTransaction.id
                     );
                     setFocusedTransaction(null);
                   }}
@@ -146,8 +163,8 @@ export default function TransactionsTable({ transactions, role }) {
                   onClick={() => {
                     changeStatus(
                       "rejected",
-                      focusedTransaction.userId,
-                      focusedTransaction.sessionId
+                      focusedTransaction.uid,
+                      focusedTransaction.id
                     );
                     setFocusedTransaction(null);
                   }}
@@ -164,7 +181,7 @@ export default function TransactionsTable({ transactions, role }) {
         <thead>
           <tr>
             <th>التاريخ</th>
-            {(role === "admin" || role === "moderator") && <th>الاسم</th>}
+            <th>الاسم</th>
             <th>id جلا لايف</th>
             <th>المبلغ</th>
             <th>الحالة</th>
@@ -179,12 +196,9 @@ export default function TransactionsTable({ transactions, role }) {
                   transaction.createdAt?.seconds * 1000
                 ).toLocaleDateString()}
               </td>
-              {/* name */}
-              {(role === "admin" || role === "moderator") && (
-                <td key="name" className="text-center">
-                  {transaction.userName}
-                </td>
-              )}
+              <td key="name" className="text-center">
+                {transaction.firstName + " " + transaction.lastName}
+              </td>
               <td key="2" className="text-center">
                 {transaction.appId}
               </td>

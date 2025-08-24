@@ -3,7 +3,6 @@
 import {
   doc,
   getDoc,
-  getDocs,
   collectionGroup,
   orderBy,
   query,
@@ -12,7 +11,7 @@ import {
 } from "firebase/firestore";
 import { initializeFirebase } from "../../../firebase_config";
 import { useState, useEffect } from "react";
-import TransactionsTable from "../../Components/TransactionsTable";
+import WithdrawsTable from "../../Components/WithdrawsTable";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function Page() {
@@ -71,31 +70,20 @@ export default function Page() {
             orderBy("createdAt", "desc")
           );
         }
-        console.log("Constructed query:", q);
-
-        // const querySnapshot = await getDocs(q);
-        // const list = querySnapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-        // setOrders(list);
 
         // Subscribe
         unsubscribe = onSnapshot(q, (snapshot) => {
-          console.log("Withdraw orders snapshot received:", snapshot.size);
           const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
           setOrders(list);
+          setLoading(false);
         });
       } catch (e) {
         console.error("Error loading withdraw orders:", e);
         setError(e?.message || "حدث خطأ غير متوقع");
-      } finally {
-        setLoading(false);
       }
     }
 
     load();
-
-    // return () => {
-    //   if (typeof unsubscribe === "function") unsubscribe();
-    // };
   }, [db, uid]);
 
   return (
@@ -104,8 +92,11 @@ export default function Page() {
         <h1>طلبات السحب</h1>
       </div>
       <div>
-        <TransactionsTable transactions={orders} role={role} />
-        {loading && <p className="text-sm text-gray-500">جارِ التحميل...</p>}
+        <WithdrawsTable transactions={orders} role={role} />
+        {loading && <p className="text-lg text-center">جارِ التحميل...</p>}
+        {!loading && orders.length === 0 && (
+          <p className="text-lg text-center">لا توجد طلبات سحب</p>
+        )}
         {error && <p className="text-sm text-red-500">{error}</p>}
       </div>
     </div>

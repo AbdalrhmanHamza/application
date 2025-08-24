@@ -6,7 +6,6 @@ import { useAuth } from "../../contexts/AuthContext";
 import { initializeFirebase } from "../../../firebase_config";
 import {
   collection,
-  getDocs,
   getDoc,
   onSnapshot,
   collectionGroup,
@@ -18,73 +17,59 @@ import {
 
 export default function Page() {
   const { db } = initializeFirebase();
-  const user = useAuth().user;
-  const userRef = user ? doc(db, "users", user.uid) : null;
+  const { user } = useAuth();
 
   const [transactions, setTransactions] = useState([]);
-  const transactionsData = [];
+  const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !db) return;
 
-    let unSubscribe; // Declare at useEffect level
+    let unsubscribe;
 
     const fetchTransactions = async () => {
       try {
+        setLoading(true);
+        setTransactions([]);
+
+        const userRef = doc(db, "users", user.uid);
         const userMetadata = await getDoc(userRef);
-        console.log("User is authenticated:", user);
+        const userRole = userMetadata.exists()
+          ? userMetadata.data()?.role || "user"
+          : "user";
+        setRole(userRole);
+
         const uid = user.uid;
-        console.log("user ID:", uid);
 
-        let transactionsRef;
-        let queryRef = null;
-
-        console.log("User role:", userMetadata.data()?.role);
-
-        switch (userMetadata.data()?.role) {
-          case "admin":
-            transactionsRef = collectionGroup(db, "transactions");
-            queryRef = query(transactionsRef, orderBy("createdAt", "desc"));
-            break;
-          case "user":
-            transactionsRef = collection(db, `users/${uid}/transactions`);
-            queryRef = query(transactionsRef, orderBy("createdAt", "desc"));
-            break;
-          case "moderator":
-            transactionsRef = collectionGroup(db, "transactions");
-            queryRef = query(
-              transactionsRef,
-              where("moderatorId", "==", uid),
-              orderBy("createdAt", "desc")
-            );
-            break;
-          default:
-            console.error("Unknown user role:", userMetadata.data()?.role);
-            return;
+        let q;
+        if (userRole === "admin") {
+          q = query(collectionGroup(db, "transactions"), orderBy("createdAt", "desc"));
+        } else if (userRole === "moderator") {
+          q = query(
+            collectionGroup(db, "transactions"),
+            where("moderatorId", "==", uid),
+            orderBy("createdAt", "desc")
+          );
+        } else {
+          q = query(collection(db, `users/${uid}/transactions`), orderBy("createdAt", "desc"));
         }
 
-        console.log("transactionsRef: ", transactionsRef);
-
-        // Initial fetch
-        onSnapshot(queryRef || transactionsRef, (snapshot) => {
-          const transactionsData = [];
-          snapshot.forEach((doc) => {
-            const data = doc.data();
-            transactionsData.push({ id: doc.id, ...data });
-          });
-          setTransactions(transactionsData);
+        unsubscribe = onSnapshot(q, (snapshot) => {
+          const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+          setTransactions(list);
+          setLoading(false);
         });
       } catch (error) {
         console.error("Error fetching transactions:", error);
+        setLoading(false);
       }
     };
 
     fetchTransactions();
 
     return () => {
-      if (unSubscribe) {
-        unSubscribe();
-      }
+      if (typeof unsubscribe === "function") unsubscribe();
       setTransactions([]);
     };
   }, [user, db]);
@@ -95,7 +80,11 @@ export default function Page() {
         <h1 className="text-2xl font-bold">المشتريات</h1>
       </div>
       <div className="mt-4 border-t-2 border-neutral-800 pt-4">
-        <TransactionsTable transactions={transactions} />
+        <TransactionsTable transactions={transactions} role={role} />
+        {loading && <p className="text-lg text-center">جارِ التحميل...</p>}
+        {!loading && transactions.length === 0 && (
+          <p className="text-lg text-center">لا توجد مشتريات</p>
+        )}
       </div>
     </div>
   );

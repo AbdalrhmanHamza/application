@@ -7,6 +7,32 @@ import { db, messaging } from "../../../lib/firebaseAdmin";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function getReadablePaymentMethod(pm) {
+  switch (pm.type) {
+    case "card":
+      if (pm.card.wallet) {
+        // Apple Pay, Google Pay, etc.
+        return pm.card.wallet.type;
+      }
+      return `${pm.card.brand} (card)`;
+
+    case "amazon_pay":
+      return "Amazon Pay";
+
+    case "paypal":
+      return "PayPal";
+
+    case "ideal":
+      return "iDEAL";
+
+    case "sofort":
+      return "SOFORT";
+
+    default:
+      return pm.type; // fallback, e.g. 'bancontact', 'alipay'
+  }
+}
+
 export async function POST(req) {
   console.log("🎉🎉🚀Received webhook request:", req.method, req.url);
 
@@ -33,7 +59,7 @@ export async function POST(req) {
   }
 
   // Fetch headers and verify signature
-  const headersList = headers();
+  const headersList = await headers();
   const signature =
     headersList.get("stripe-signature") || headersList.get("Stripe-Signature");
   if (!signature) {
@@ -66,7 +92,14 @@ export async function POST(req) {
     }
 
     const session = event.data.object;
-    console.log("⛅⏳ Checkout session completed:", session.id);
+    const paymentIntent = await stripe.paymentIntents.retrieve(
+      session.payment_intent,
+      {
+        expand: ["payment_method"],
+      }
+    );
+    console.log("🚀⏳⛅Payment Intent:", paymentIntent);
+    console.log("⛅⏳ Checkout session completed:", session);
 
     // Only persist successful paid sessions
     if (session.payment_status !== "paid") {
@@ -100,12 +133,14 @@ export async function POST(req) {
         appId: meta.appId || "",
         moderatorId: moderatorId || "",
         name: meta.coins || "",
-        userEmail: session.customer_email || "",
+        userEmail: session.customer_details?.email || "",
         userId: userId,
         userName: session.customer_details?.name || "",
         sessionId: session.id,
         status: "pending",
         payment_status: session.payment_status,
+        country: session.customer_details?.address?.country || "",
+        paymentMethod: getReadablePaymentMethod(paymentIntent.payment_method),
       };
 
       if (!snap.exists) {

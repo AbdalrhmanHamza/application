@@ -11,8 +11,6 @@ import {
 } from "firebase/storage";
 
 const formErrors = {
-  emailError: null,
-  emailValue: "",
   nameError: null,
   nameValue: "",
   uidError: null,
@@ -39,10 +37,6 @@ const formErrors = {
 
 function reducer(state, action) {
   switch (action.type) {
-    case "SET_EMAIL_ERROR":
-      return { ...state, emailError: action.payload };
-    case "SET_EMAIL_VALUE":
-      return { ...state, emailValue: action.payload };
     case "SET_NAME_ERROR":
       return { ...state, nameError: action.payload };
     case "SET_NAME_VALUE":
@@ -178,7 +172,6 @@ export default function Page() {
     // Read inputs
     const firstName = String(formData.get("firstName") || "").trim();
     const lastName = String(formData.get("lastName") || "").trim();
-    const email = String(formData.get("email") || "").trim();
     const phone = String(formData.get("phone") || "").trim();
     const appId = String(formData.get("appId") || "").trim();
     const country = String(formData.get("country") || "").trim();
@@ -196,7 +189,6 @@ export default function Page() {
     // Values
     nextState.nameValue = firstName;
     nextState.lastNameValue = lastName;
-    nextState.emailValue = email;
     nextState.phoneValue = phone;
     nextState.appIdValue = appId;
     nextState.countryValue = country;
@@ -208,9 +200,6 @@ export default function Page() {
     nextState.nameError = firstName.length < 2 ? "الاسم الاول قصير جدا" : null;
     nextState.lastNameError =
       lastName.length < 2 ? "الاسم الاخير قصير جدا" : null;
-    nextState.emailError = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-      ? null
-      : "الايميل غير صالح";
     nextState.phoneError =
       phone.length < 5 || !/^\+?\d+$/.test(phone)
         ? "رقم الهاتف غير صالح"
@@ -238,7 +227,6 @@ export default function Page() {
       nextState.uidError ||
         nextState.nameError ||
         nextState.lastNameError ||
-        nextState.emailError ||
         nextState.phoneError ||
         nextState.appIdError ||
         nextState.countryError ||
@@ -264,7 +252,6 @@ export default function Page() {
       await addDoc(docRef, {
         firstName,
         lastName,
-        email,
         phone,
         country,
         appId,
@@ -396,24 +383,6 @@ export default function Page() {
                 </div>
               )}
             </div>
-          </div>
-          <div className="flex flex-col col-span-6 md:col-span-4  gap-3 flex-1">
-            <label htmlFor="email">الايميل</label>
-            <input
-              type="text"
-              value={errorsState.emailValue}
-              onChange={(e) =>
-                dispatch({ type: "SET_EMAIL_VALUE", payload: e.target.value })
-              }
-              id="email"
-              name="email"
-              className="border focus:outline-2 focus:outline-white border-neutral-700 bg-neutral-900 px-2 py-1 rounded  "
-            />
-            {errorsState.emailError && (
-              <div className="text-red-500 text-sm mt-1">
-                {errorsState.emailError}
-              </div>
-            )}
           </div>
 
           <div className="flex flex-col col-span-6 md:col-span-4 gap-3 flex-1">

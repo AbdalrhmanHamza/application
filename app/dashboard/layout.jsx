@@ -4,8 +4,11 @@ import Link from "next/link";
 import { initializeFirebase } from "../../firebase_config";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Layout({ children }) {
+  const { user } = useAuth();
+  const { displayName, email } = user || {};
   const { auth } = initializeFirebase();
   const router = useRouter();
   return (
@@ -19,6 +22,12 @@ export default function Layout({ children }) {
               alt="Gala Logo"
             />
           </Link>
+          <div className="mr-4">
+            <p className="text-lg font-semibold">
+              <span className="text-neutral-300">اهلا </span>
+              {displayName}
+            </p>
+          </div>
         </div>
         <div>
           <button
@@ -32,9 +41,9 @@ export default function Layout({ children }) {
           </button>
         </div>
       </div>
-      <div className="flex flex-row gap-2 flex-1 items-stretch">
+      <div className="flex flex-col lg:flex-row sm:flex-col gap-2 flex-1 items-stretch">
         {/* sidebar */}
-        <div className="w-62 border-2 border-neutral-900 rounded-lg p-2">
+        <div className="w-62 flex-1 sm:flex-1 lg:flex-initial border-2 border-neutral-900 rounded-lg p-2">
           <div>
             <ul className="flex flex-col gap-3 p-2">
               <li className="border border-neutral-800 rounded-lg">

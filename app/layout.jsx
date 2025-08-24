@@ -35,13 +35,8 @@ export default function RootLayout({ children }) {
             <FCMTokensProvider>{children}</FCMTokensProvider>
           </ProductProvider>
         </AuthProvider>
-        {/* modal outlet */}
-        <div id="modal-root">
-          <div>
-            <button onClick={() => setModalIsOpen(false)}>close modal</button>
-          </div>
-          <div id="portal"></div>
-        </div>
+        {/* Modal portal root (must be unique and empty) */}
+        <div id="modal-root" />
       </body>
     </html>
   );

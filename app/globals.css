@@ -86,6 +86,10 @@
   tr:nth-child(even) {
     background-color: #242121;
   }
+  .medium-zoom-image {
+    z-index: 10000;
+    scale: 1.5;
+  }
 }
 
 /* body {

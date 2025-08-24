@@ -28,3 +28,10 @@ messaging.onBackgroundMessage((payload) => {
     );
   }
 });
+
+self.addEventListener("notificationclick", function (event) {
+  event.notification.close();
+
+  // Open your website when user clicks the notification
+  event.waitUntil(clients.openWindow("https://yourwebsite.com"));
+});

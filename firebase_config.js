@@ -1,6 +1,13 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, doc, setDoc, arrayUnion } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  arrayUnion,
+  arrayRemove,
+  updateDoc,
+} from "firebase/firestore";
 import { getMessaging, getToken } from "firebase/messaging";
 
 let firebase = null;
@@ -60,38 +67,85 @@ export async function generateToken() {
 
   console.log("Notification permission:", permission);
 
-  if (permission == "granted") {
+  if (permission === "granted") {
     const { firebase } = initializeFirebase();
     const { auth } = initializeFirebase();
-    const uid = auth.currentUser.uid;
+    const uid = auth.currentUser?.uid;
+    if (!uid) {
+      console.warn("No authenticated user when generating FCM token");
+      return null;
+    }
 
     messaging = getMessaging(firebase);
-    const token = await getToken(messaging, {
-      vapidKey:
-        "BHgGaiKkhafFIBXyNiEZdMeM_NbxcCpsARxBDCbH4ak-Fu1yYH7UpXrc14Cdd2e7Mc6VL3AW8sohx95Nx_pgyj8",
-    });
+    const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+    const token = await getToken(messaging, { vapidKey });
     console.log("FCM Token:", token);
-    saveTokenInFirestore(token, uid);
+
+    // Avoid duplicate writes and keep one token per device
+    const prevToken =
+      typeof window !== "undefined"
+        ? window.localStorage.getItem("fcm_token")
+        : null;
+
+    if (prevToken === token) {
+      console.log("Same FCM token as before; skipping Firestore update");
+      return token;
+    }
+
+    await replaceTokenInFirestore(uid, prevToken, token);
+
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("fcm_token", token);
+    }
     return token;
   } else {
     console.log("Notification permission not granted");
+    return null;
   }
 }
 
-export function saveTokenInFirestore(token, uid) {
+export async function replaceTokenInFirestore(uid, oldToken, newToken) {
   const { db } = initializeFirebase();
   if (!db) {
     console.error("Firestore is not initialized");
     return;
   }
-
-  // Save the token in Firestore under the user's document
   const userRef = doc(db, "users", uid);
-  setDoc(userRef, { fcmToken: arrayUnion(token) }, { merge: true })
-    .then(() => {
+
+  try {
+    if (oldToken && oldToken !== newToken) {
+      await updateDoc(userRef, { fcmToken: arrayRemove(oldToken) });
+      console.log("Removed old FCM token for this device");
+    }
+  } catch (e) {
+    console.warn(
+      "Failed to remove old FCM token (may not exist):",
+      e?.message || e
+    );
+  }
+
+  try {
+    if (newToken) {
+      await setDoc(userRef, { fcmToken: arrayUnion(newToken) }, { merge: true });
       console.log("FCM Token saved in Firestore");
-    })
-    .catch((error) => {
-      console.error("Error saving FCM Token in Firestore:", error);
-    });
+    }
+  } catch (error) {
+    console.error("Error saving FCM Token in Firestore:", error);
+  }
+}
+
+export async function saveTokenInFirestore(token, uid) {
+  // Backward-compatible helper: ensures single token per device
+  const prevToken =
+    typeof window !== "undefined"
+      ? window.localStorage.getItem("fcm_token")
+      : null;
+  if (prevToken === token) {
+    console.log("Token unchanged; skipping save");
+    return;
+  }
+  await replaceTokenInFirestore(uid, prevToken, token);
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem("fcm_token", token);
+  }
 }

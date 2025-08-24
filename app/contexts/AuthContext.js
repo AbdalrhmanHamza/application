@@ -11,11 +11,13 @@ export default function AuthProvider({ children }) {
   const { auth } = initializeFirebase();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  console.log("🚀🚀🎉Auth state changed, user:");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser || null);
       setLoading(false);
+      console.log("🚀🚀🎉Auth state changed, user:", firebaseUser);
     });
     return () => unsubscribe();
   }, []);
