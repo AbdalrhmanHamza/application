@@ -21,8 +21,6 @@ const formErrors = {
   countryValue: "",
   amountError: null,
   amountValue: "",
-  lastNameError: null,
-  lastNameValue: "",
   appIdError: null,
   appIdValue: "",
   methodError: null,
@@ -45,10 +43,6 @@ function reducer(state, action) {
       return { ...state, uidError: action.payload };
     case "SET_UID_VALUE":
       return { ...state, uidValue: action.payload };
-    case "SET_LAST_NAME_ERROR":
-      return { ...state, lastNameError: action.payload };
-    case "SET_LAST_NAME_VALUE":
-      return { ...state, lastNameValue: action.payload };
     case "SET_PHONE_ERROR":
       return { ...state, phoneError: action.payload };
     case "SET_PHONE_VALUE":
@@ -170,8 +164,7 @@ export default function Page() {
   // action function
   async function formAction(prevState, formData) {
     // Read inputs
-    const firstName = String(formData.get("firstName") || "").trim();
-    const lastName = String(formData.get("lastName") || "").trim();
+    const fullName = String(formData.get("fullName") || "").trim();
     const phone = String(formData.get("phone") || "").trim();
     const appId = String(formData.get("appId") || "").trim();
     const country = String(formData.get("country") || "").trim();
@@ -187,8 +180,7 @@ export default function Page() {
     const nextState = { ...errorsState };
 
     // Values
-    nextState.nameValue = firstName;
-    nextState.lastNameValue = lastName;
+    nextState.nameValue = fullName;
     nextState.phoneValue = phone;
     nextState.appIdValue = appId;
     nextState.countryValue = country;
@@ -197,9 +189,7 @@ export default function Page() {
     nextState.methodInfoValue = methodInfo;
 
     // Errors
-    nextState.nameError = firstName.length < 2 ? "الاسم الاول قصير جدا" : null;
-    nextState.lastNameError =
-      lastName.length < 2 ? "الاسم الاخير قصير جدا" : null;
+    nextState.nameError = fullName.length < 2 ? "الاسم قصير جدا" : null;
     nextState.phoneError =
       phone.length < 5 || !/^\+?\d+$/.test(phone)
         ? "رقم الهاتف غير صالح"
@@ -226,7 +216,6 @@ export default function Page() {
     const hasErrors = Boolean(
       nextState.uidError ||
         nextState.nameError ||
-        nextState.lastNameError ||
         nextState.phoneError ||
         nextState.appIdError ||
         nextState.countryError ||
@@ -250,8 +239,7 @@ export default function Page() {
     try {
       const docRef = collection(doc(db, "users", uid), "withdrawOrders");
       await addDoc(docRef, {
-        firstName,
-        lastName,
+        fullName,
         phone,
         country,
         appId,
@@ -283,7 +271,7 @@ export default function Page() {
           body: JSON.stringify({
             token,
             title: "طلب سحب جديد",
-            body: `قام ${firstName} ${lastName} بإنشاء طلب سحب بمبلغ $${amountNum}`,
+            body: `قام ${fullName} بإنشاء طلب سحب بمبلغ $${amountNum}`,
           }),
         });
       });
@@ -303,45 +291,30 @@ export default function Page() {
           noValidate
           className="max-w-200 py-8 w-full grid grid-cols-6 gap-y-8 mt-4 px-6"
         >
-          <div className="flex flex-wrap col-span-6 justify-between gap-8">
-            <div className="flex flex-col gap-3 flex-1">
-              <label htmlFor="firstName">الاسم الاول</label>
-              <input
-                type="text"
-                value={errorsState.nameValue}
-                onChange={(e) =>
-                  dispatch({ type: "SET_NAME_VALUE", payload: e.target.value })
-                }
-                id="firstName"
-                name="firstName"
-                className="border focus:outline-2 focus:outline-white border-neutral-700 bg-neutral-900 px-2 py-1 rounded"
-              />
-              {errorsState.nameError && (
-                <div className="text-red-500 text-sm mt-1">
-                  {errorsState.nameError}
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col gap-3 flex-1">
-              <label htmlFor="lastName">الاسم الاخير</label>
-              <input
-                type="text"
-                value={errorsState.lastNameValue}
-                onChange={(e) =>
-                  dispatch({
-                    type: "SET_LAST_NAME_VALUE",
-                    payload: e.target.value,
-                  })
-                }
-                id="lastName"
-                name="lastName"
-                className="border focus:outline-2 focus:outline-white border-neutral-700 bg-neutral-900 px-2 py-1 rounded  "
-              />
-              {errorsState.lastNameError && (
-                <div className="text-red-500 text-sm mt-1">
-                  {errorsState.lastNameError}
-                </div>
-              )}
+          <div className="col-span-full">
+            <h2 className="mb-4">بياناتك الشخصية</h2>
+            <div className="flex flex-wrap col-span-6 justify-between gap-8">
+              <div className="flex flex-col gap-3 flex-1">
+                <label htmlFor="fullName">الاسم بالكامل</label>
+                <input
+                  type="text"
+                  value={errorsState.nameValue}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "SET_NAME_VALUE",
+                      payload: e.target.value,
+                    })
+                  }
+                  id="fullName"
+                  name="fullName"
+                  className="border focus:outline-2 focus:outline-white border-neutral-700 bg-neutral-900 px-2 py-1 rounded"
+                />
+                {errorsState.nameError && (
+                  <div className="text-red-500 text-sm mt-1">
+                    {errorsState.nameError}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex flex-wrap col-span-6 justify-between gap-8">
@@ -351,7 +324,10 @@ export default function Page() {
                 type="text"
                 value={errorsState.phoneValue}
                 onChange={(e) =>
-                  dispatch({ type: "SET_PHONE_VALUE", payload: e.target.value })
+                  dispatch({
+                    type: "SET_PHONE_VALUE",
+                    payload: e.target.value,
+                  })
                 }
                 inputMode="numeric"
                 id="phone"
@@ -370,7 +346,10 @@ export default function Page() {
                 type="text"
                 value={errorsState.appIdValue}
                 onChange={(e) =>
-                  dispatch({ type: "SET_APPID_VALUE", payload: e.target.value })
+                  dispatch({
+                    type: "SET_APPID_VALUE",
+                    payload: e.target.value,
+                  })
                 }
                 inputMode="numeric"
                 id="appId"
@@ -384,230 +363,214 @@ export default function Page() {
               )}
             </div>
           </div>
+          <span className="col-span-full h-[2px] bg-neutral-700 my-4"></span>
+          {/* payment method info */}
+          <div className="col-span-full flex flex-col gap-4">
+            <h2 className="mb-4">بيانات السحب</h2>
+            <div className="flex flex-col md:col-span-4 gap-3 flex-1">
+              <label htmlFor="country">الدولة</label>
+              <input
+                type="text"
+                value={errorsState.countryValue}
+                onChange={(e) =>
+                  dispatch({
+                    type: "SET_COUNTRY_VALUE",
+                    payload: e.target.value,
+                  })
+                }
+                id="country"
+                name="country"
+                className="border focus:outline-2 focus:outline-white border-neutral-700 bg-neutral-900 px-2 py-1 rounded  "
+              />
+              {errorsState.countryError && (
+                <div className="text-red-500 text-sm mt-1">
+                  {errorsState.countryError}
+                </div>
+              )}
+            </div>
 
-          <div className="flex flex-col col-span-6 md:col-span-4 gap-3 flex-1">
-            <label htmlFor="country">الدولة</label>
-            <input
-              type="text"
-              value={errorsState.countryValue}
-              onChange={(e) =>
-                dispatch({ type: "SET_COUNTRY_VALUE", payload: e.target.value })
-              }
-              id="country"
-              name="country"
-              className="border focus:outline-2 focus:outline-white border-neutral-700 bg-neutral-900 px-2 py-1 rounded  "
-            />
-            {errorsState.countryError && (
-              <div className="text-red-500 text-sm mt-1">
-                {errorsState.countryError}
-              </div>
-            )}
-          </div>
+            <div className="flex flex-col col-span-6 md:col-span-4 gap-3 flex-1">
+              <label htmlFor="amount">المبلغ (بالدولار $)</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={errorsState.amountValue}
+                onChange={(e) =>
+                  dispatch({
+                    type: "SET_AMOUNT_VALUE",
+                    payload: e.target.value,
+                  })
+                }
+                id="amount"
+                name="amount"
+                className="border focus:outline-2 focus:outline-white border-neutral-700 bg-neutral-900 px-2 py-1 rounded  "
+              />
+              {errorsState.amountError && (
+                <div className="text-red-500 text-sm mt-1">
+                  {errorsState.amountError}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col col-span-6 md:col-span-4 gap-3 flex-1">
+              <label htmlFor="method">اسم طريقة السحب (مثل paypal)</label>
+              <input
+                type="text"
+                value={errorsState.methodValue}
+                onChange={(e) =>
+                  dispatch({
+                    type: "SET_METHOD_VALUE",
+                    payload: e.target.value,
+                  })
+                }
+                id="method"
+                name="method"
+                className="border focus:outline-2 focus:outline-white border-neutral-700 bg-neutral-900 px-2 py-1 rounded  "
+              />
+              {errorsState.methodError && (
+                <div className="text-red-500 text-sm mt-1">
+                  {errorsState.methodError}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col col-span-6 md:col-span-4 gap-3 flex-1">
+              <label htmlFor="methodInfo">
+                ادخل معلوماتك داخل طريقة السحب حتي نقوم بتحويل الاموال
+              </label>
+              <textarea
+                id="methodInfo"
+                value={errorsState.methodInfoValue}
+                onChange={(e) =>
+                  dispatch({
+                    type: "SET_METHODINFO_VALUE",
+                    payload: e.target.value,
+                  })
+                }
+                rows={4}
+                name="methodInfo"
+                className="border focus:outline-2 focus:outline-white border-neutral-700 bg-neutral-900 px-2 py-1 rounded  "
+              />
+              {errorsState.methodInfoError && (
+                <div className="text-red-500 text-sm mt-1">
+                  {errorsState.methodInfoError}
+                </div>
+              )}
+            </div>
+            {/* upoloading area */}
 
-          <div className="flex flex-col col-span-6 md:col-span-4 gap-3 flex-1">
-            <label htmlFor="amount">المبلغ (بالدولار $)</label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={errorsState.amountValue}
-              onChange={(e) =>
-                dispatch({ type: "SET_AMOUNT_VALUE", payload: e.target.value })
-              }
-              id="amount"
-              name="amount"
-              className="border focus:outline-2 focus:outline-white border-neutral-700 bg-neutral-900 px-2 py-1 rounded  "
-            />
-            {errorsState.amountError && (
-              <div className="text-red-500 text-sm mt-1">
-                {errorsState.amountError}
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col col-span-6 md:col-span-4 gap-3 flex-1">
-            <label htmlFor="method">اسم طريقة السحب (مثل paypal)</label>
-            <input
-              type="text"
-              value={errorsState.methodValue}
-              onChange={(e) =>
-                dispatch({ type: "SET_METHOD_VALUE", payload: e.target.value })
-              }
-              id="method"
-              name="method"
-              className="border focus:outline-2 focus:outline-white border-neutral-700 bg-neutral-900 px-2 py-1 rounded  "
-            />
-            {errorsState.methodError && (
-              <div className="text-red-500 text-sm mt-1">
-                {errorsState.methodError}
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col col-span-6 md:col-span-4 gap-3 flex-1">
-            <label htmlFor="methodInfo">
-              ادخل معلوماتك داخل طريقة السحب حتي نقوم بتحويل الاموال
-            </label>
-            <textarea
-              id="methodInfo"
-              value={errorsState.methodInfoValue}
-              onChange={(e) =>
-                dispatch({
-                  type: "SET_METHODINFO_VALUE",
-                  payload: e.target.value,
-                })
-              }
-              rows={4}
-              name="methodInfo"
-              className="border focus:outline-2 focus:outline-white border-neutral-700 bg-neutral-900 px-2 py-1 rounded  "
-            />
-            {errorsState.methodInfoError && (
-              <div className="text-red-500 text-sm mt-1">
-                {errorsState.methodInfoError}
-              </div>
-            )}
-          </div>
-          {/* upoloading area */}
-
-          <div className="flex flex-col col-span-6 md:col-span-6 gap-3 flex-1">
-            <label
-              htmlFor="dropzone-file"
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer 
+            <div className="flex flex-col col-span-6 md:col-span-6 gap-3 flex-1">
+              <label
+                htmlFor="dropzone-file"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer 
           transition-colors duration-300 
           ${
             isDragOver
               ? "border-blue-500 bg-blue-50 dark:bg-blue-900"
               : "border-gray-300 bg-gray-50 dark:bg-gray-700"
           }`}
-            >
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <svg
-                  className={`w-8 h-8 mb-4 ${
-                    isDragOver ? "text-blue-500" : "text-gray-500"
-                  }`}
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 20 16"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                  />
-                </svg>
-                {!file ? (
-                  <>
-                    <p className="mb-2 text-sm text-gray-400">
-                      <span className="font-semibold">اضغط للرفع</span> او اسحب
-                      و افلت
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <svg
+                    className={`w-8 h-8 mb-4 ${
+                      isDragOver ? "text-blue-500" : "text-gray-500"
+                    }`}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 20 16"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                    />
+                  </svg>
+                  {!file ? (
+                    <>
+                      <p className="mb-2 text-sm text-gray-400">
+                        <span className="font-semibold">اضغط للرفع</span> او
+                        اسحب و افلت
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        PNG, JPG or PDF (MAX. 1.5MB)
+                      </p>
+                    </>
+                  ) : (
+                    <p className="mb-2 text-sm text-gray-700 dark:text-gray-200">
+                      {file.name}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      PNG, JPG or PDF (MAX. 1.5MB)
-                    </p>
-                  </>
-                ) : (
-                  <p className="mb-2 text-sm text-gray-700 dark:text-gray-200">
-                    {file.name}
-                  </p>
-                )}
-              </div>
-              <input
-                id="dropzone-file"
-                type="file"
-                name="transactionImage"
-                accept="image/*, application/pdf"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-            </label>
-
-            {/* Progress Bar */}
-            {file && (
-              <div className="w-full mt-2">
-                <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-600">
-                  <div
-                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  ></div>
+                  )}
                 </div>
-                <span className="truncate max-w-[70%]">{file.name}</span>
-                <p className="text-xs text-gray-500 mt-1">{progress}%</p>
+                <input
+                  id="dropzone-file"
+                  type="file"
+                  name="transactionImage"
+                  accept="image/*, application/pdf"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </label>
+
+              {/* Progress Bar */}
+              {file && (
+                <div className="w-full mt-2">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-600">
+                    <div
+                      className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    ></div>
+                  </div>
+                  <span className="truncate max-w-[70%]">{file.name}</span>
+                  <p className="text-xs text-gray-500 mt-1">{progress}%</p>
+                </div>
+              )}
+            </div>
+            {errorsState.ImageError && (
+              <div className="text-red-500 text-sm mt-1 col-span-6">
+                {errorsState.ImageError}
               </div>
             )}
-          </div>
-          {errorsState.ImageError && (
-            <div className="text-red-500 text-sm mt-1 col-span-6">
-              {errorsState.ImageError}
+            {/* moderators */}
+            <span className="col-span-full h-[2px] bg-neutral-700 my-4"></span>
+            <div className="col-span-6">
+              <h2 className="mb-4">اختر الوكالة</h2>
+              <ul className="grid w-full gap-6 md:grid-cols-2">
+                <li>
+                  <input
+                    type="radio"
+                    id="moderator-1"
+                    name="moderator"
+                    value="boHg3y9qhQa5yqZezqaOyw7f5n62"
+                    className="hidden peer"
+                    onChange={() => {
+                      dispatch({
+                        type: "SET_MODERATOR",
+                        payload: "boHg3y9qhQa5yqZezqaOyw7f5n62",
+                      });
+                      dispatch({ type: "SET_MODERATOR_ERROR", payload: null });
+                    }}
+                    checked={
+                      errorsState.moderator === "boHg3y9qhQa5yqZezqaOyw7f5n62"
+                    }
+                  />
+                  <label
+                    htmlFor="moderator-1"
+                    className="inline-flex items-center justify-between w-full p-5 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-blue-500 peer-checked:border-blue-600 dark:peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
+                  >
+                    <div className="block">
+                      <div className="w-full text-lg font-semibold">
+                        وكالة سام
+                      </div>
+                    </div>
+                  </label>
+                </li>
+              </ul>
             </div>
-          )}
 
-          {/* moderators */}
-          <div className="col-span-6">
-            <h2 className="mb-4">اختر الوكالة</h2>
-            <ul className="grid w-full gap-6 md:grid-cols-2">
-              <li>
-                <input
-                  type="radio"
-                  id="moderator-1"
-                  name="moderator"
-                  value="boHg3y9qhQa5yqZezqaOyw7f5n62"
-                  className="hidden peer"
-                  onChange={() => {
-                    dispatch({
-                      type: "SET_MODERATOR",
-                      payload: "boHg3y9qhQa5yqZezqaOyw7f5n62",
-                    });
-                    dispatch({ type: "SET_MODERATOR_ERROR", payload: null });
-                  }}
-                  checked={
-                    errorsState.moderator === "boHg3y9qhQa5yqZezqaOyw7f5n62"
-                  }
-                />
-                <label
-                  htmlFor="moderator-1"
-                  className="inline-flex items-center justify-between w-full p-5 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-blue-500 peer-checked:border-blue-600 dark:peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
-                >
-                  <div className="block">
-                    <div className="w-full text-lg font-semibold">
-                      وكالة سام
-                    </div>
-                  </div>
-                </label>
-              </li>
-              {/* radio button */}
-              {/* <li>
-                <input
-                  type="radio"
-                  id="moderator-2"
-                  name="moderator"
-                  value="moderator-gangon"
-                  className="hidden peer"
-                  onChange={() => {
-                    dispatch({
-                      type: "SET_MODERATOR",
-                      payload: "jeZ2zLXL62WkZbjGO8mFDlNm9Sg1",
-                    });
-                    dispatch({ type: "SET_MODERATOR_ERROR", payload: null });
-                  }}
-                  checked={
-                    errorsState.moderator === "jeZ2zLXL62WkZbjGO8mFDlNm9Sg1"
-                  }
-                />
-                <label
-                  htmlFor="moderator-2"
-                  className="inline-flex items-center justify-between w-full p-5 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-blue-500 peer-checked:border-blue-600 dark:peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
-                >
-                  <div className="block">
-                    <div className="w-full text-lg font-semibold">
-                      وكالة جنجون
-                    </div>
-                  </div>
-                </label>
-              </li> */}
-            </ul>
             <div>
               {errorsState.moderatorError && (
                 <p className="text-red-500 text-sm mt-2">

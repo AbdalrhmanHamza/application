@@ -1,15 +1,94 @@
 "use client";
 
-import { useState } from "react";
+import { useReducer } from "react";
+
+function scrollInView(item, active = false) {
+  if (!active) {
+    item.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+}
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "TOGGLE_ACCORDION_1":
+      scrollInView(action.item, state.accordion1Open);
+      return {
+        ...state,
+        accordion1Open: !state.accordion1Open,
+      };
+    case "TOGGLE_ACCORDION_2":
+      scrollInView(action.item, state.accordion2Open);
+      return {
+        ...state,
+        accordion2Open: !state.accordion2Open,
+      };
+    case "TOGGLE_ACCORDION_3":
+      scrollInView(action.item, state.accordion3Open);
+      return {
+        ...state,
+        accordion3Open: !state.accordion3Open,
+      };
+    case "TOGGLE_ACCORDION_4":
+      scrollInView(action.item, state.accordion4Open);
+      return {
+        ...state,
+        accordion4Open: !state.accordion4Open,
+      };
+    case "TOGGLE_ACCORDION_5":
+      scrollInView(action.item, state.accordion5Open);
+      return {
+        ...state,
+        accordion5Open: !state.accordion5Open,
+      };
+    case "TOGGLE_ACCORDION_6":
+      scrollInView(action.item, state.accordion6Open);
+      return {
+        ...state,
+        accordion6Open: !state.accordion6Open,
+      };
+    case "TOGGLE_ACCORDION_7":
+      scrollInView(action.item, state.accordion7Open);
+      return {
+        ...state,
+        accordion7Open: !state.accordion7Open,
+      };
+    case "TOGGLE_ACCORDION_8":
+      scrollInView(action.item, state.accordion8Open);
+      return {
+        ...state,
+        accordion8Open: !state.accordion8Open,
+      };
+    case "TOGGLE_ACCORDION_9":
+      scrollInView(action.item, state.accordion9Open);
+      return {
+        ...state,
+        accordion9Open: !state.accordion9Open,
+      };
+    default:
+      return state;
+  }
+}
 
 export default function Page() {
-  const policies = [];
-  policies.forEach((policy) => {
-    const [policyIsOpen, setPolicyOpen] = useState(false);
-    const togglePolicy = () => {
-      setPolicyOpen(!policyIsOpen);
-    };
-  });
+  const accordionsInitialState = {
+    accordion1Open: false,
+    accordion2Open: false,
+    accordion3Open: false,
+    accordion4Open: false,
+    accordion5Open: false,
+    accordion6Open: false,
+    accordion7Open: false,
+    accordion8Open: false,
+    accordion9Open: false,
+  };
+
+  const [accordionsState, setAccordionsState] = useReducer(
+    reducer,
+    accordionsInitialState
+  );
 
   return (
     <>
@@ -18,18 +97,33 @@ export default function Page() {
           <h1>سياسات تطبيق غلا لايف</h1>
           <div className="privacy-content-wrapper">
             <div className="accordion">
-              <button className="accordion-item">
+              <button
+                className="accordion-item"
+                onClick={(e) =>
+                  setAccordionsState({
+                    type: "TOGGLE_ACCORDION_1",
+                    item: e.target,
+                  })
+                }
+              >
                 <span className="accordion-title">🏢 فتح وإنشاء وكالة</span>
                 <span className="chevron-down">
                   <img
-                    className="chevron-icon"
+                    className={
+                      "chevron-icon " +
+                      (accordionsState.accordion1Open && "chevron-active")
+                    }
                     src="/chevron-down.svg"
                     alt="open accordion"
                     draggable="false"
                   />
                 </span>
               </button>
-              <div className="accordion-content">
+              <div
+                className={`accordion-content ${
+                  accordionsState.accordion1Open && "accordion-active"
+                }`}
+              >
                 <p>
                   <strong>1. شروط فتح وكالة جديدة:</strong> لفتح وكالة مضيفين
                   يتطلب على الوكيل إحضار 3 داعمين و10 مستخدمين ولا مانع من فتح
@@ -46,19 +140,34 @@ export default function Page() {
               </div>
             </div>
             <div className="accordion">
-              <button className="accordion-item">
+              <button
+                className="accordion-item"
+                onClick={(e) =>
+                  setAccordionsState({
+                    type: "TOGGLE_ACCORDION_2",
+                    item: e.target,
+                  })
+                }
+              >
                 <span className="accordion-title">
                   🎁 مكافآت افتتاح الوكالات الجديدة
                 </span>
                 <span className="chevron-down">
                   <img
-                    className="chevron-icon"
+                    className={
+                      "chevron-icon " +
+                      (accordionsState.accordion2Open && "chevron-active")
+                    }
                     src="/chevron-down.svg"
                     alt="open accordion"
                   />
                 </span>
               </button>
-              <div className="accordion-content">
+              <div
+                className={`accordion-content ${
+                  accordionsState.accordion2Open && "accordion-active"
+                }`}
+              >
                 <p>
                   <strong>5. خلال أول شهر:</strong>
                   <br />
@@ -69,18 +178,33 @@ export default function Page() {
               </div>
             </div>
             <div className="accordion">
-              <button className="accordion-item">
+              <button
+                className="accordion-item"
+                onClick={(e) =>
+                  setAccordionsState({
+                    type: "TOGGLE_ACCORDION_3",
+                    item: e.target,
+                  })
+                }
+              >
                 <span className="accordion-title">🎉 الاحتفالات والمكافآت</span>
                 <span className="chevron-down">
                   <img
-                    className="chevron-icon"
+                    className={
+                      "chevron-icon " +
+                      (accordionsState.accordion3Open && "chevron-active")
+                    }
                     src="/chevron-down.svg"
                     alt="open accordion"
                     draggable="false"
                   />
                 </span>
               </button>
-              <div className="accordion-content">
+              <div
+                className={`accordion-content ${
+                  accordionsState.accordion3Open && "accordion-active"
+                }`}
+              >
                 <p>
                   <strong>3. حفل افتتاح الوكالة:</strong>
                   <br />
@@ -100,18 +224,33 @@ export default function Page() {
               </div>
             </div>
             <div className="accordion">
-              <button className="accordion-item">
+              <button
+                className="accordion-item"
+                onClick={(e) =>
+                  setAccordionsState({
+                    type: "TOGGLE_ACCORDION_4",
+                    item: e.target,
+                  })
+                }
+              >
                 <span className="accordion-title">💎 الهدايا والدعم</span>
                 <span className="chevron-down">
                   <img
-                    className="chevron-icon"
+                    className={
+                      "chevron-icon " +
+                      (accordionsState.accordion4Open && "chevron-active")
+                    }
                     src="/chevron-down.svg"
                     alt="open accordion"
                     draggable="false"
                   />
                 </span>
               </button>
-              <div className="accordion-content">
+              <div
+                className={`accordion-content ${
+                  accordionsState.accordion4Open && "accordion-active"
+                }`}
+              >
                 <p>
                   <strong>6. تحويل الهدايا:</strong>
                   <br />
@@ -132,18 +271,33 @@ export default function Page() {
               </div>
             </div>
             <div className="accordion">
-              <button className="accordion-item">
+              <button
+                className="accordion-item"
+                onClick={(e) =>
+                  setAccordionsState({
+                    type: "TOGGLE_ACCORDION_5",
+                    item: e.target,
+                  })
+                }
+              >
                 <span className="accordion-title">💵 الرواتب والسحب</span>
                 <span className="chevron-down">
                   <img
-                    className="chevron-icon"
+                    className={
+                      "chevron-icon " +
+                      (accordionsState.accordion5Open && "chevron-active")
+                    }
                     src="/chevron-down.svg"
                     alt="open accordion"
                     draggable="false"
                   />
                 </span>
               </button>
-              <div className="accordion-content">
+              <div
+                className={`accordion-content ${
+                  accordionsState.accordion5Open && "accordion-active"
+                }`}
+              >
                 <p>
                   <strong>7. سحب الراتب بالدولار:</strong>
                   <br />
@@ -168,20 +322,35 @@ export default function Page() {
               </div>
             </div>
             <div className="accordion">
-              <button className="accordion-item">
+              <button
+                className="accordion-item"
+                onClick={(e) =>
+                  setAccordionsState({
+                    type: "TOGGLE_ACCORDION_6",
+                    item: e.target,
+                  })
+                }
+              >
                 <span className="accordion-title">
                   ⚠️ شروط النزول من الوكالة
                 </span>
                 <span className="chevron-down">
                   <img
-                    className="chevron-icon"
+                    className={
+                      "chevron-icon " +
+                      (accordionsState.accordion6Open && "chevron-active")
+                    }
                     src="/chevron-down.svg"
                     alt="open accordion"
                     draggable="false"
                   />
                 </span>
               </button>
-              <div className="accordion-content">
+              <div
+                className={`accordion-content ${
+                  accordionsState.accordion6Open && "accordion-active"
+                }`}
+              >
                 <p>
                   <strong>9. وجود رصيد مستحق:</strong>
                   <br />
@@ -213,13 +382,24 @@ export default function Page() {
         <section className="content container-padding table-section">
           <div className="privacy-wrapper">
             <div className="accordion">
-              <button className="accordion-item">
+              <button
+                className="accordion-item"
+                onClick={(e) =>
+                  setAccordionsState({
+                    type: "TOGGLE_ACCORDION_7",
+                    item: e.target,
+                  })
+                }
+              >
                 <span className="accordion-title">
                   سياسة الوكالات و المضيفين
                 </span>
                 <span className="chevron-down">
                   <img
-                    className="chevron-icon"
+                    className={
+                      "chevron-icon " +
+                      (accordionsState.accordion7Open && "chevron-active")
+                    }
                     src="/chevron-down.svg"
                     alt="open accordion"
                     draggable="false"
@@ -227,7 +407,11 @@ export default function Page() {
                 </span>
               </button>
               {/* <!-- <h1>سياسة الوكالات و المضيفين</h1> --> */}
-              <div className="accordion-content">
+              <div
+                className={`accordion-content ${
+                  accordionsState.accordion7Open && "accordion-active"
+                }`}
+              >
                 <div className="privacy-table">
                   <table className="subscriptions-table">
                     <thead>
@@ -456,11 +640,22 @@ export default function Page() {
         <section className="content container-padding table-section">
           <div className="privacy-wrapper">
             <div className="accordion">
-              <button className="accordion-item">
+              <button
+                className="accordion-item"
+                onClick={(e) =>
+                  setAccordionsState({
+                    type: "TOGGLE_ACCORDION_8",
+                    item: e.target,
+                  })
+                }
+              >
                 <span className="accordion-title">سياسة وكالات الشحن</span>
                 <span className="chevron-down">
                   <img
-                    className="chevron-icon"
+                    className={
+                      "chevron-icon " +
+                      (accordionsState.accordion8Open && "chevron-active")
+                    }
                     src="/chevron-down.svg"
                     alt="open accordion"
                     draggable="false"
@@ -468,7 +663,11 @@ export default function Page() {
                 </span>
               </button>
               {/* <!-- <h1>سياسة وكالات الشحن</h1> --> */}
-              <div className="accordion-content">
+              <div
+                className={`accordion-content ${
+                  accordionsState.accordion8Open && "accordion-active"
+                }`}
+              >
                 <div className="privacy-table">
                   <table className="subscriptions-table">
                     <thead>
@@ -548,11 +747,22 @@ export default function Page() {
         <section className="content container-padding table-section">
           <div className="privacy-wrapper">
             <div className="accordion">
-              <button className="accordion-item">
+              <button
+                className="accordion-item"
+                onClick={(e) =>
+                  setAccordionsState({
+                    type: "TOGGLE_ACCORDION_9",
+                    item: e.target,
+                  })
+                }
+              >
                 <span className="accordion-title">قواعد مكافأة الغرفة</span>
                 <span className="chevron-down">
                   <img
-                    className="chevron-icon"
+                    className={
+                      "chevron-icon " +
+                      (accordionsState.accordion9Open && "chevron-active")
+                    }
                     src="/chevron-down.svg"
                     alt="open accordion"
                     draggable="false"
@@ -560,7 +770,11 @@ export default function Page() {
                 </span>
               </button>
               {/* <!-- <h1>قواعد مكافأة الغرفة</h1> --> */}
-              <div className="accordion-content">
+              <div
+                className={`accordion-content ${
+                  accordionsState.accordion9Open && "accordion-active"
+                }`}
+              >
                 <div className="privacy-table">
                   <table className="subscriptions-table">
                     <thead>

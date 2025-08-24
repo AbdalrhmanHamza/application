@@ -88,7 +88,10 @@
   }
   .medium-zoom-image {
     z-index: 10000;
-    scale: 1.5;
+  }
+  .scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #ffffff #000000;
   }
 }
 

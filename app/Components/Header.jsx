@@ -1,15 +1,10 @@
 "use client";
 
 import { useAuth } from "../contexts/AuthContext";
-import { signOut } from "firebase/auth";
-import { useRouter } from "next/navigation";
-import { initializeFirebase } from "../../firebase_config"; // Adjust the import path as necessary
 import Link from "next/link";
 import { useState } from "react";
 
 export default function Header() {
-  const { auth } = initializeFirebase();
-  const router = useRouter();
   const { user } = useAuth();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,6 +14,10 @@ export default function Header() {
 
   return (
     <header className="header">
+      <div
+        onClick={toggleMenu}
+        className={`fixed inset-0 bg-black/40 z-40 ${!isMenuOpen && "hidden"}`}
+      ></div>
       <nav className="navbar">
         <div className="logo">
           <Link href="/" className="logo-link-wrapper">
@@ -29,27 +28,47 @@ export default function Header() {
           <div className="nav-links-container">
             <ul className="nav-links">
               <li>
-                <Link className="nav-link" href="/">
+                <Link
+                  onClick={() => setIsMenuOpen(false)}
+                  className="nav-link"
+                  href="/"
+                >
                   الرئيسية
                 </Link>
               </li>
               <li>
-                <Link className="nav-link" href="/learn">
+                <Link
+                  onClick={() => setIsMenuOpen(false)}
+                  className="nav-link"
+                  href="/learn"
+                >
                   فيديوهات تعليمية
                 </Link>
               </li>
               <li>
-                <Link className="nav-link" href="/policy">
+                <Link
+                  onClick={() => setIsMenuOpen(false)}
+                  className="nav-link"
+                  href="/policy"
+                >
                   سياسة غلا لايف
                 </Link>
               </li>
               <li>
-                <Link className="nav-link" href="/marketplace">
+                <Link
+                  onClick={() => setIsMenuOpen(false)}
+                  className="nav-link"
+                  href="/marketplace"
+                >
                   متجر غلا لايف
                 </Link>
               </li>
               <li>
-                <Link className="nav-link" href="/withdraw">
+                <Link
+                  onClick={() => setIsMenuOpen(false)}
+                  className="nav-link"
+                  href="/withdraw"
+                >
                   سحب راتب
                 </Link>
               </li>

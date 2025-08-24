@@ -61,7 +61,7 @@ export default function Modal({ isOpen, onClose, children }) {
       <div onClick={onClose} className="fixed inset-0" />
       <div
         ref={contentRef}
-        className="max-h-[90vh] overflow-y-auto overflow-x-auto relative bg-neutral-900 p-6 rounded shadow-lg max-w-lg w-full"
+        className="max-h-[90vh] scrollbar overflow-y-auto overflow-x-auto relative bg-neutral-900 p-6 rounded shadow-lg max-w-lg w-full"
       >
         <button
           className="absolute hover:bg-neutral-800 transition-colors duration-300 bg-neutral-900 top-4 right-4 p-2 rounded-lg border border-neutral-700  text-gray-600 hover:text-gray-800"

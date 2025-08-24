@@ -70,9 +70,10 @@ export default function WithdrawsTable({ transactions, role }) {
               <div>
                 <strong>الاسم</strong>
                 <span className="inline-block mr-2 border border-neutral-700 px-2 py-1 rounded-lg">
-                  {focusedTransaction.firstName +
-                    " " +
-                    focusedTransaction.lastName}
+                  {focusedTransaction.fullName ||
+                    focusedTransaction.firstName +
+                      " " +
+                      focusedTransaction.lastName}
                 </span>
               </div>
               <div>
@@ -136,7 +137,7 @@ export default function WithdrawsTable({ transactions, role }) {
                 <img
                   data-zoomable
                   style={{ objectFit: "contain" }}
-                  className="w-[95%] mx-auto  rounded-lg"
+                  className="w-[95%] mx-auto rounded-lg"
                   src={focusedTransaction.imageUrl}
                   alt="صوره ايصال التحويل"
                 />
@@ -191,13 +192,14 @@ export default function WithdrawsTable({ transactions, role }) {
         <tbody>
           {transactions.map((transaction, i) => (
             <tr key={i} className="border-b border-neutral-800">
-              <td key="1">
+              <td key="1" className="text-center">
                 {new Date(
                   transaction.createdAt?.seconds * 1000
                 ).toLocaleDateString()}
               </td>
               <td key="name" className="text-center">
-                {transaction.firstName + " " + transaction.lastName}
+                {transaction.fullName ||
+                  transaction.firstName + " " + transaction.lastName}
               </td>
               <td key="2" className="text-center">
                 {transaction.appId}
