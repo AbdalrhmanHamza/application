@@ -119,7 +119,7 @@ export default function Page() {
                     appIdError: "(1-9 ارقام) يرجى إدخال ID صالح",
                   });
                 }
-                if (e.target.value.length == 9) {
+                if (e.target.value.length <= 9 && e.target.value.length > 0) {
                   setErrors({ ...errors, appIdError: null });
                 }
               }}

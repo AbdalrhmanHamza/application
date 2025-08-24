@@ -28,8 +28,8 @@ export default function ProductCard({
       setError({ error: "يرجى تسجيل الدخول لشراء المنتج" });
       return;
     }
-    if (!appId || appId.length !== 9) {
-      setErrors({ ...errors, appIdError: "يرجى إدخال ID صالح" });
+    if (!appId || appId.length < 1 || appId.length > 9) {
+      setErrors({ ...errors, appIdError: "(1-9 ارقام) يرجى إدخال ID صالح" });
       return;
     }
     if (!moderator) {
