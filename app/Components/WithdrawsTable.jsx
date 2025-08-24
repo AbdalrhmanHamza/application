@@ -222,17 +222,16 @@ export default function WithdrawsTable({ transactions, role }) {
                     : "مرفوض"}
                 </span>
               </td>
-              {role === "admin" ||
-                (role === "moderator" && (
-                  <td>
-                    <button
-                      onClick={() => setFocusedTransaction(transaction)}
-                      className="p-2 border border-neutral-600 rounded-lg hover:bg-neutral-800"
-                    >
-                      عرض التفاصيل
-                    </button>
-                  </td>
-                ))}
+              {(role === "admin" || role === "moderator") && (
+                <td>
+                  <button
+                    onClick={() => setFocusedTransaction(transaction)}
+                    className="p-2 border border-neutral-600 rounded-lg hover:bg-neutral-800"
+                  >
+                    عرض التفاصيل
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

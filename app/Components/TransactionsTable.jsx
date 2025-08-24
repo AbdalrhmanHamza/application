@@ -119,7 +119,7 @@ export default function TransactionsTable({ transactions, role }) {
                 </span>
               </div>
               <div>
-                <strong>طريقة السحب:</strong>
+                <strong>طريقة الدفع:</strong>
                 <span className="inline-block mr-2 border border-neutral-700 px-2 py-1 rounded-lg">
                   {focusedTransaction.paymentMethod}
                 </span>
@@ -208,17 +208,16 @@ export default function TransactionsTable({ transactions, role }) {
                     : "مرفوض"}
                 </span>
               </td>
-              {role === "admin" ||
-                (role === "moderator" && (
-                  <td>
-                    <button
-                      onClick={() => setFocusedTransaction(transaction)}
-                      className="p-2 border border-neutral-600 rounded-lg hover:bg-neutral-800"
-                    >
-                      عرض التفاصيل
-                    </button>
-                  </td>
-                ))}
+              {(role === "admin" || role === "moderator") && (
+                <td>
+                  <button
+                    onClick={() => setFocusedTransaction(transaction)}
+                    className="p-2 border border-neutral-600 rounded-lg hover:bg-neutral-800"
+                  >
+                    عرض التفاصيل
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
