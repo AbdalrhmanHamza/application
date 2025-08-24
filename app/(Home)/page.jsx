@@ -1,20 +1,22 @@
 "use client";
 
-import { use, useEffect } from "react";
+import { use, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import { generateToken } from "../../firebase_config";
 import { getMessaging, onMessage } from "firebase/messaging";
 import { initializeFirebase } from "../../firebase_config";
 import { toast } from "sonner";
+import Modal from "../Components/Modal";
 
 export default function Home() {
+  const [modalOpen, setModalOpen] = useState(false);
   const { user } = use(AuthContext);
   const { firebase } = initializeFirebase();
 
   useEffect(() => {
     if (user) {
-      const messaging = getMessaging(firebase);
       generateToken();
+      const messaging = getMessaging(firebase);
       onMessage(messaging, (payload) => {
         // show toast notification
         toast(payload.notification.title, {
@@ -30,6 +32,38 @@ export default function Home() {
   return (
     <main className="main w-full">
       {/* <!-- main section --> */}
+      {modalOpen && (
+        <Modal isOpen={true} onClose={() => setModalOpen(false)}>
+          <div class="modal-content-container">
+            <div class="modal-content">
+              <h1 class="modal-heading">خطوات التحميل</h1>
+              <ol>
+                <li>
+                  قم بتحميل تطبيق <strong>Test Flight</strong>
+                  <a
+                    href="https://apps.apple.com/us/app/testflight/id899247664"
+                    class="instruction-link link-highlight"
+                    target="_blank"
+                  >
+                    اضغط هنا للتحميل
+                  </a>
+                </li>
+                <li>
+                  بعد تحميل التطبيق
+                  <a
+                    href="https://testflight.apple.com/join/4mcF8ADS"
+                    class="instruction-link link-highlight"
+                    target="_blank"
+                  >
+                    اضغط هنا
+                  </a>
+                  لتحميل تطبيق <strong>Gala Live</strong> لل ios
+                </li>
+              </ol>
+            </div>
+          </div>
+        </Modal>
+      )}
       <section className="main-section container-padding" id="main">
         <div className="main-content-wrapper">
           <div className="main-content-text">
@@ -51,14 +85,24 @@ export default function Home() {
               </p>
             </div>
             <div className="download-buttons">
-              <div className="app-store">
-                <a href="" className="apple-coming-soon">
+              <div
+                className="app-store"
+                onClick={() => {
+                  setModalOpen(true);
+                }}
+              >
+                <button
+                  onClick={() => {
+                    setModalOpen(true);
+                  }}
+                  className="apple-coming-soon"
+                >
                   <img
                     className="google-play-img store-btn"
                     src="/App-store.svg"
                     alt="Apple App Store Download"
                   />
-                </a>
+                </button>
               </div>
               <div className="google-play">
                 <a

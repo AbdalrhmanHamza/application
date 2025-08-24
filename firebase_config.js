@@ -78,6 +78,7 @@ export async function generateToken() {
 
     messaging = getMessaging(firebase);
     const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+    console.log("before generating the token");
     const token = await getToken(messaging, { vapidKey });
     console.log("FCM Token:", token);
 
@@ -126,7 +127,11 @@ export async function replaceTokenInFirestore(uid, oldToken, newToken) {
 
   try {
     if (newToken) {
-      await setDoc(userRef, { fcmToken: arrayUnion(newToken) }, { merge: true });
+      await setDoc(
+        userRef,
+        { fcmToken: arrayUnion(newToken) },
+        { merge: true }
+      );
       console.log("FCM Token saved in Firestore");
     }
   } catch (error) {

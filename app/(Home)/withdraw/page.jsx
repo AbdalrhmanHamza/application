@@ -195,7 +195,9 @@ export default function Page() {
         ? "رقم الهاتف غير صالح"
         : null;
     nextState.appIdError =
-      appId.length < 5 || !/^\d+$/.test(appId) ? "ID التطبيق غير صالح" : null;
+      appId.length < 1 || appId.length > 9 || !/^\d+$/.test(appId)
+        ? "ID التطبيق غير صالح"
+        : null;
     nextState.countryError = country.length < 2 ? "اسم الدولة غير صالح" : null;
     nextState.amountError =
       !Number.isFinite(amountNum) || amountNum <= 10

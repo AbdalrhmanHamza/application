@@ -112,11 +112,11 @@ export default function Page() {
                 if (/^\d*$/.test(e.target.value)) {
                   setAppId(e.target.value);
                 }
-                if (e.target.value.length < 9 || e.target.value.length > 9) {
+                if (e.target.value.length < 1 || e.target.value.length > 9) {
                   console.log("Invalid input");
                   setErrors({
                     ...errors,
-                    appIdError: "(9 ارقام) يرجى إدخال ID صالح",
+                    appIdError: "(1-9 ارقام) يرجى إدخال ID صالح",
                   });
                 }
                 if (e.target.value.length == 9) {
